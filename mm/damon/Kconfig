@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
+
 menu "Data Access Monitoring"
 
 config DAMON
@@ -17,3 +18,4 @@ config DAMON_RECLAIM
 	default y
 
 endmenu
+
