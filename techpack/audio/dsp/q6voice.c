@@ -10055,7 +10055,6 @@ int voice_get_cvp_param(void)
 				       adsp_err_get_err_str(v->async_err));
 				ret = adsp_err_get_lnx_err_code(v->async_err);
 				kfree(get_param);
-				get_param = NULL;
 				goto done;
 			}
 
@@ -10073,17 +10072,12 @@ int voice_get_cvp_param(void)
 				voice_tx_clip_cnt =  voice_cvpparam_tmp_buf[3];
 			}
 			kfree(get_param);
-			get_param = NULL;
 			ret = 0;
 		}
 		}
 	}
 done:
 	mutex_unlock(&common.common_lock);
-	if (get_param != NULL) {
-		kfree(get_param);
-		get_param = NULL;
-	}
 	return ret;
 }
 EXPORT_SYMBOL(voice_get_cvp_param);

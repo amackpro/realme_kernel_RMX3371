@@ -40,10 +40,6 @@
 #include "codecs/bolero/wsa-macro.h"
 #include "kona-port-config.h"
 
-#ifdef CONFIG_SND_SOC_SIA81XX
-#include "../../../../oplus/kernel_4.19/audio/codecs/sia81xx/sia81xx_aux_dev_if.h"
-#endif /* OPLUS_SND_SOC_SIA81XX */
-
 #ifdef OPLUS_BUG_COMPATIBILITY
 #include <linux/regulator/consumer.h>
 #endif /* OPLUS_BUG_COMPATIBILITY */
@@ -572,12 +568,7 @@ static struct dev_config mi2s_tx_cfg[] = {
 
 static struct tdm_dev_config pri_tdm_dev_config[MAX_PATH][TDM_PORT_MAX] = {
 	{ /* PRI TDM */
-		#ifndef OPLUS_ARCH_EXTENDS
-		/*Add for 4 solts tdm_0 audio bringup*/
 		{ {0,   4, 0xFFFF} }, /* RX_0 */
-		#else
-		{ {0,   4, 8, 12, 0xFFFF} }, /* RX_0 */
-		#endif /*OPLUS_ARCH_EXTENDS*/
 		{ {8,  12, 0xFFFF} }, /* RX_1 */
 		{ {16, 20, 0xFFFF} }, /* RX_2 */
 		{ {24, 28, 0xFFFF} }, /* RX_3 */
@@ -6769,11 +6760,8 @@ static struct snd_soc_dai_link msm_common_misc_fe_dai_links[] = {
 		.ops = &msm_cdc_dma_be_ops,
 	},
 	#ifdef OPLUS_FEATURE_AUDIO_FTM
-	/*Add for Hostless to the end*/
 	MI2S_TX_HOSTLESS_DAILINK("Primary MI2S TX_Hostless", "Primary MI2S_TX Hostless Capture", "PRI_MI2S_TX_HOSTLESS"),
 	TX_CDC_DMA_HOSTLESS_DAILINK("TX4_CDC_DMA Hostless", "TX4_CDC_DMA Hostless", "TX4_CDC_DMA_HOSTLESS"),
-	/*Add for pri tdm_0*/
-	PRI_TDM_TX_HOSTLESS_DAILINK("Primary TDM0 Hostless", "Primary TDM0 Hostless Capture", "PRI_TDM_TX_0_HOSTLESS"),
 	#endif /* OPLUS_FEATURE_AUDIO_FTM */
 };
 
@@ -8172,15 +8160,6 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 		rc = of_property_read_u32(dev->of_node, "qcom,tdm-audio-intf",
 				&val);
 		if (!rc && val) {
-			#ifdef OPLUS_ARCH_EXTENDS
-			/* Add for oplus extend aduio which use tdm */
-			extend_i2s_be_dailinks_func = symbol_request(extend_codec_i2s_be_dailinks);
-			if (extend_i2s_be_dailinks_func) {
-				extend_i2s_be_dailinks_func(msm_tdm_be_dai_links, ARRAY_SIZE(msm_tdm_be_dai_links));
-			}
-			dev_err(dev, "%s: msm_tdm_be_dai_links enter val = %d\n",__func__,val);
-			#endif /* OPLUS_ARCH_EXTENDS */
-
 			memcpy(msm_kona_dai_links + total_links,
 				msm_tdm_be_dai_links,
 				sizeof(msm_tdm_be_dai_links));
@@ -8405,15 +8384,6 @@ static int msm_init_aux_dev(struct platform_device *pdev,
 	int codecs_found = 0;
 	int ret = 0;
 
-
-
-#ifdef CONFIG_SND_SOC_SIA81XX
-	const char *codec_vendor;
-	int rc = 0;
-	int sia81xx_aux_num = 0;
-	int sia81xx_codec_conf_num = 0;
-#endif /* CONFIG_SND_SOC_SIA81XX */
-
 	/* Get maximum WSA device count for this platform */
 	ret = of_property_read_u32(pdev->dev.of_node,
 				   "qcom,wsa-max-devs", &wsa_max_devs);
@@ -8618,19 +8588,6 @@ aux_dev_register:
 	card->num_aux_devs = wsa_max_devs + codec_aux_dev_cnt;
 	card->num_configs = wsa_max_devs + codec_aux_dev_cnt;
 
-#ifdef CONFIG_SND_SOC_SIA81XX
-	rc = of_property_read_string(pdev->dev.of_node,
-			"oplus,speaker-vendor", &codec_vendor);
-	if (!rc) {
-		if (!strcmp(codec_vendor, "sia81xx")) {
-			sia81xx_aux_num = soc_sia81xx_get_aux_num(pdev);
-			sia81xx_codec_conf_num = soc_sia81xx_get_codec_conf_num(pdev);
-			card->num_aux_devs += sia81xx_aux_num;
-			card->num_configs += sia81xx_codec_conf_num;
-		}
-	}
-#endif
-
 	/* Alloc array of AUX devs struct */
 	msm_aux_dev = devm_kcalloc(&pdev->dev, card->num_aux_devs,
 				       sizeof(struct snd_soc_aux_dev),
@@ -8680,15 +8637,6 @@ aux_dev_register:
 		msm_codec_conf[i].of_node =
 				wsa881x_dev_info[i].of_node;
 	}
-
-#ifdef CONFIG_SND_SOC_SIA81XX
-	if (!rc) {
-		if (!strcmp(codec_vendor, "sia81xx")) {
-        		soc_sia81xx_init(pdev, msm_aux_dev + 1, sia81xx_aux_num,
-                                msm_codec_conf + 1, sia81xx_codec_conf_num);
-		}
-	}
-#endif
 
 	for (i = 0; i < codec_aux_dev_cnt; i++) {
 		msm_aux_dev[wsa_max_devs + i].name = NULL;

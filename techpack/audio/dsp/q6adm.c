@@ -2805,14 +2805,8 @@ static int adm_arrange_mch_map_v8(
 		} else if (channel_mode == 4) {
 			ep_payload->dev_channel_mapping[0] = PCM_CHANNEL_FL;
 			ep_payload->dev_channel_mapping[1] = PCM_CHANNEL_FR;
-			#ifndef OPLUS_ARCH_EXTENDS
-			/*Add for TDM with 4 speakers */
 			ep_payload->dev_channel_mapping[2] = PCM_CHANNEL_LS;
 			ep_payload->dev_channel_mapping[3] = PCM_CHANNEL_RS;
-			#else/*OPLUS_ARCH_EXTENDS*/
-			ep_payload->dev_channel_mapping[2] = PCM_CHANNEL_FL;
-			ep_payload->dev_channel_mapping[3] = PCM_CHANNEL_FR;
-			#endif /* OPLUS_ARCH_EXTENDS */
 		} else if (channel_mode == 5) {
 			ep_payload->dev_channel_mapping[0] = PCM_CHANNEL_FL;
 			ep_payload->dev_channel_mapping[1] = PCM_CHANNEL_FR;
@@ -2966,14 +2960,8 @@ static int adm_arrange_mch_ep2_map_v8(
 	} else if (channel_mode == 4) {
 		ep_payload->dev_channel_mapping[0] = PCM_CHANNEL_FL;
 		ep_payload->dev_channel_mapping[1] = PCM_CHANNEL_FR;
-		#ifndef OPLUS_ARCH_EXTENDS
-		/*Add for TDM audio bringup*/
 		ep_payload->dev_channel_mapping[2] = PCM_CHANNEL_LS;
 		ep_payload->dev_channel_mapping[3] = PCM_CHANNEL_RS;
-		#else/*OPLUS_ARCH_EXTENDS*/
-		ep_payload->dev_channel_mapping[2] = PCM_CHANNEL_FL;
-		ep_payload->dev_channel_mapping[3] = PCM_CHANNEL_FR;
-		#endif /* OPLUS_ARCH_EXTENDS */
 	} else if (channel_mode == 5) {
 		ep_payload->dev_channel_mapping[0] = PCM_CHANNEL_FL;
 		ep_payload->dev_channel_mapping[1] = PCM_CHANNEL_FR;

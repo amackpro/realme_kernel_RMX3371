@@ -50,17 +50,6 @@
 #define AFE_PORT_ID_TFADSP_TX     AFE_PORT_ID_TERTIARY_MI2S_TX
 #endif/*OPLUS_FEATURE_PLATFORM_LITO*/
 
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-#define AFE_PORT_ID_TFADSP_RX_TERT     AFE_PORT_ID_TERTIARY_MI2S_RX
-#define AFE_PORT_ID_TFADSP_TX_TERT     AFE_PORT_ID_TERTIARY_MI2S_TX
-
-/*Add for tdm mode vi feedback*/
-static int32_t afe_port_id_tfa_rx = AFE_PORT_ID_TFADSP_RX;
-static int32_t afe_port_id_tfa_tx = AFE_PORT_ID_TFADSP_TX;
-#define  AFE_PORT_RX    0
-#define  AFE_PORT_TX	1
-#endif /*OPLUS_FEATURE_TFA98XX_VI_FEEDBACK*/
-
 /* zhenyu.dong@MM.AUDIO.DRIVER.CODEC
  * smartpa_id distinguish which smartPA we use.
  * 1 stands for TFA98XX
@@ -75,15 +64,6 @@ int smartpa_id = 0;
 #define AFE_PARAM_ID_SMARTPA_PM_SET_PARAM               0x10012D1B
 #define AFE_PARAM_ID_SMARTPA_PM_RESULT                  0x10012D1C
 #endif /* OPLUS_FEATURE_SMARTPA_PM */
-
-#ifdef OPLUS_ARCH_EXTENDS
-/* modify for race condition while receiving adsp response */
-#define AFE_NOWAIT_TOKEN    2048
-#define TDM_FLAG            1
-static int smartpa_tdm_port_id_flag = 0;
-#endif /* OPLUS_ARCH_EXTENDS */
-
-
 
 #define WAKELOCK_TIMEOUT	5000
 #define AFE_CLK_TOKEN	1024
@@ -380,11 +360,6 @@ bool afe_close_done[2] = {true, true};
 #define SIZEOF_CFG_CMD(y) \
 		(sizeof(struct apr_hdr) + sizeof(u16) + (sizeof(struct y)))
 
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-static u32 tfa_use_i2s = 0;
-int set_tfa_i2s(u32 tfa_i2s);
-#endif/* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
-
 static bool q6afe_is_afe_lsm_port(int port_id);
 
 static void q6afe_unload_avcs_modules(u16 port_id, int index)
@@ -402,22 +377,6 @@ static void q6afe_unload_avcs_modules(u16 port_id, int index)
 	kfree(pm[index]);
 	pm[index] = NULL;
 }
-
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-int set_tfa_i2s(u32 tfa_i2s)
-{
-	if(tfa_i2s > 3) {
-		tfa_use_i2s = 0;
-		pr_info("error, tfa_i2s set fail");
-	} else {
-		tfa_use_i2s = tfa_i2s;
-	}
-	return tfa_use_i2s;
-
-}
-EXPORT_SYMBOL(set_tfa_i2s);
-#endif/* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
-
 
 static int q6afe_load_avcs_modules(int num_modules, u16 port_id,
 		 uint32_t use_case, u32 format_id)
@@ -1218,29 +1177,11 @@ static int32_t afe_callback(struct apr_client_data *data, void *priv)
 					atomic_set(&this_afe.clk_state, 0);
 					wake_up(&this_afe.clk_wait);
 				} else {
-					#ifdef OPLUS_ARCH_EXTENDS
-					if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-						if (data->token != AFE_NOWAIT_TOKEN) {
-							atomic_set(&this_afe.state, 0);
-							if (afe_token_is_valid(data->token))
-								wake_up(&this_afe.wait[data->token]);
-							else
-								return -EINVAL;
-						}
-					} else {
-						atomic_set(&this_afe.state, 0);
-						if (afe_token_is_valid(data->token))
-							wake_up(&this_afe.wait[data->token]);
-						else
-							return -EINVAL;
-					}
-					#else
 					atomic_set(&this_afe.state, 0);
 					if (afe_token_is_valid(data->token))
 						wake_up(&this_afe.wait[data->token]);
 					else
 						return -EINVAL;
-					#endif
 				}
 				break;
 			case AFE_SERVICE_CMD_REGISTER_RT_PORT_DRIVER:
@@ -1977,7 +1918,7 @@ static int q6afe_get_params(u16 port_id, struct mem_mapping_hdr *mem_hdr,
 #ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
 int get_smartpa_id(void);
 #endif /*OPLUS_FEATURE_TFA98XX_VI_FEEDBACK*/
-static int set_smartpa_pm_status_apr(void *buf, int cmd_size)
+int set_smartpa_pm_status_apr(void *buf, int cmd_size)
 {
 	int ret;
 	int port = 0;
@@ -2007,10 +1948,6 @@ static int set_smartpa_pm_status_apr(void *buf, int cmd_size)
 	if (1 == get_smartpa_id()) {
 		port = AFE_PORT_ID_TFADSP_TX;
 		topo_id = TOPOLOGY_TFADSP_ID_TX;
-
-		if(tfa_use_i2s == 2) {
-			port = AFE_PORT_ID_TFADSP_TX_TERT;
-		}
 	}
 #endif /*OPLUS_FEATURE_TFA98XX_VI_FEEDBACK*/
 	if(topo_id != afe_get_topology(port)) {
@@ -2052,9 +1989,8 @@ done:
 	}
 	return ret;
 }
-EXPORT_SYMBOL(set_smartpa_pm_status_apr);
 
-static int get_smartpa_pm_result_apr(void *buf, int cmd_size)
+int get_smartpa_pm_result_apr(void *buf, int cmd_size)
 {
 	int ret = 0;
 	int port = 0;
@@ -2081,11 +2017,6 @@ static int get_smartpa_pm_result_apr(void *buf, int cmd_size)
 	if (1 == get_smartpa_id()) {
 		port = AFE_PORT_ID_TFADSP_TX;
 		topo_id = TOPOLOGY_TFADSP_ID_TX;
-
-		if(tfa_use_i2s == 2) {
-			port = AFE_PORT_ID_TFADSP_TX_TERT;
-		}
-
 	}
 #endif /*OPLUS_FEATURE_TFA98XX_VI_FEEDBACK*/
 	if(topo_id != afe_get_topology(port)) {
@@ -2110,7 +2041,6 @@ static int get_smartpa_pm_result_apr(void *buf, int cmd_size)
 done:
 	return ret;
 }
-EXPORT_SYMBOL(get_smartpa_pm_result_apr);
 #endif /* OPLUS_FEATURE_SMARTPA_PM */
 
 /*
@@ -6979,16 +6909,7 @@ int afe_pseudo_port_start_nowait(u16 port_id)
 	start.hdr.pkt_size = sizeof(start);
 	start.hdr.src_port = 0;
 	start.hdr.dest_port = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	/*modify for race condition while receiving adsp response */
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		start.hdr.token = AFE_NOWAIT_TOKEN;
-	} else {
-		start.hdr.token = 0;
-	}
-	#else
-		start.hdr.token = 0;
-	#endif
+	start.hdr.token = 0;
 	start.hdr.opcode = AFE_PSEUDOPORT_CMD_START;
 	start.port_id = port_id;
 	start.timing = 1;
@@ -7077,28 +6998,11 @@ int afe_pseudo_port_stop_nowait(u16 port_id)
 	stop.hdr.pkt_size = sizeof(stop);
 	stop.hdr.src_port = 0;
 	stop.hdr.dest_port = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	/*modify for race condition while receiving adsp response */
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		stop.hdr.token = AFE_NOWAIT_TOKEN;
-	} else {
-		stop.hdr.token = 0;
-	}
-	#else
 	stop.hdr.token = 0;
-	#endif /* OPLUS_ARCH_EXTENDS */
 	stop.hdr.opcode = AFE_PSEUDOPORT_CMD_STOP;
 	stop.port_id = port_id;
 	stop.reserved = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	if (TDM_FLAG != smartpa_tdm_port_id_flag) {
-		/*modify for race condition while receiving adsp response */
-		stop.hdr.token = index;
-	}
-	#else
-	/*modify for race condition while receiving adsp response */
 	stop.hdr.token = index;
-	#endif /* OPLUS_ARCH_EXTENDS */
 
 	ret = afe_apr_send_pkt(&stop, NULL);
 	if (ret)
@@ -7611,16 +7515,7 @@ int afe_cmd_memory_map_nowait(int port_id, phys_addr_t dma_addr_p,
 	mregion->hdr.pkt_size = sizeof(mregion);
 	mregion->hdr.src_port = 0;
 	mregion->hdr.dest_port = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	/*modify for race condition while receiving adsp response */
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		mregion->hdr.token = AFE_NOWAIT_TOKEN;
-	} else {
-		mregion->hdr.token = 0;
-	}
-	#else
 	mregion->hdr.token = 0;
-	#endif /* OPLUS_ARCH_EXTENDS */
 	mregion->hdr.opcode = AFE_SERVICE_CMD_SHARED_MEM_MAP_REGIONS;
 	mregion->mem_pool_id = ADSP_MEMORY_MAP_SHMEM8_4K_POOL;
 	mregion->num_regions = 1;
@@ -7789,16 +7684,7 @@ int afe_cmd_memory_unmap_nowait(u32 mem_map_handle)
 	mregion.hdr.pkt_size = sizeof(mregion);
 	mregion.hdr.src_port = 0;
 	mregion.hdr.dest_port = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	/* modify for race condition while receiving adsp response */
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		mregion.hdr.token = AFE_NOWAIT_TOKEN;
-	} else {
-		mregion.hdr.token = 0;
-	}
-	#else
 	mregion.hdr.token = 0;
-	#endif /* OPLUS_ARCH_EXTENDS */
 	mregion.hdr.opcode = AFE_SERVICE_CMD_SHARED_MEM_UNMAP_REGIONS;
 	mregion.mem_map_handle = mem_map_handle;
 
@@ -8926,16 +8812,7 @@ int afe_port_stop_nowait(int port_id)
 	stop.hdr.pkt_size = sizeof(stop);
 	stop.hdr.src_port = 0;
 	stop.hdr.dest_port = 0;
-	#ifdef OPLUS_ARCH_EXTENDS
-	/*modify for race condition while receiving adsp response */
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		stop.hdr.token = AFE_NOWAIT_TOKEN;
-	} else {
-		stop.hdr.token = 0;
-	}
-	#else
 	stop.hdr.token = 0;
-	#endif /* OPLUS_ARCH_EXTENDS */
 	stop.hdr.opcode = AFE_PORT_CMD_DEVICE_STOP;
 	stop.port_id = port_id;
 	stop.reserved = 0;
@@ -11030,19 +10907,8 @@ static int afe_unmap_cal_data(int32_t cal_type,
 	atomic_set(&this_afe.mem_map_cal_handles[cal_index],
 		cal_block->map_data.q6map_handle);
 	atomic_set(&this_afe.mem_map_cal_index, cal_index);
-	#ifdef OPLUS_ARCH_EXTENDS
-	/* CR 3091485 | smmu fault of afe_cmd_memory_unmap_nowait during the stability*/
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		ret = afe_cmd_memory_unmap(
-			cal_block->map_data.q6map_handle);
-	} else {
-		ret = afe_cmd_memory_unmap_nowait(
-		cal_block->map_data.q6map_handle);
-	}
-	#else
 	ret = afe_cmd_memory_unmap_nowait(
 		cal_block->map_data.q6map_handle);
-	#endif /* OPLUS_ARCH_EXTENDS */
 	atomic_set(&this_afe.mem_map_cal_index, -1);
 	if (ret < 0) {
 		pr_err("%s: unmap did not work! cal_type %i ret %d\n",
@@ -11239,45 +11105,6 @@ static void afe_release_uevent_data(struct kobject *kobj)
 }
 
 #ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-/*Add for tfa98xx Speaker protection algorithm */
-int tfa_get_tdm_port_id(int tdm_id, int direct)
-{
-	if(!direct) {
-		switch (tdm_id) {
-			case 0:
-				return AFE_PORT_ID_PRIMARY_TDM_RX;
-			case 1:
-				return AFE_PORT_ID_SECONDARY_TDM_RX;
-			case 2:
-				return AFE_PORT_ID_TERTIARY_TDM_RX;
-			case 3:
-				return AFE_PORT_ID_QUATERNARY_TDM_RX;
-			case 4:
-				return AFE_PORT_ID_QUINARY_TDM_RX;
-			case 5:
-				return AFE_PORT_ID_SENARY_TDM_RX;
-			default:
-				return AFE_PORT_ID_TERTIARY_TDM_RX;
-		}
-	} else {
-		switch (tdm_id) {
-			case 0:
-				return AFE_PORT_ID_PRIMARY_TDM_TX;
-			case 1:
-				return AFE_PORT_ID_SECONDARY_TDM_TX;
-			case 2:
-				return AFE_PORT_ID_TERTIARY_TDM_TX;
-			case 3:
-				return AFE_PORT_ID_QUATERNARY_TDM_TX;
-			case 4:
-				return AFE_PORT_ID_QUINARY_TDM_TX;
-			case 5:
-				return AFE_PORT_ID_SENARY_TDM_TX;
-			default:
-				return AFE_PORT_ID_TERTIARY_TDM_TX;
-		}
-	}
-}
 int send_tfa_cal_apr(void *buf, int cmd_size, bool bRead)
 {
 	int32_t result, port_id = AFE_PORT_ID_TFADSP_RX;
@@ -11286,17 +11113,6 @@ int send_tfa_cal_apr(void *buf, int cmd_size, bool bRead)
 	struct rtac_cal_block_data *tfa_cal = &(this_afe.tfa_cal);
 	struct mem_mapping_hdr mem_hdr;
 	struct param_hdr_v3  param_hdr;
-
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-/*Add for distinguish vi feedback port*/
-	if(tfa_use_i2s == 2) {
-		port_id = AFE_PORT_ID_TFADSP_RX_TERT;
-	}
-	/*Add for tdm mode iv feedback*/
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		port_id = afe_port_id_tfa_rx;
-	}
-#endif /* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
 
 	pr_debug("%s\n", __func__);
 
@@ -11409,15 +11225,7 @@ int send_tfa_cal_apr(void *buf, int cmd_size, bool bRead)
 			memcpy(buf,  resp,  cmd_size);
 		}
 	}
-	#ifdef OPLUS_ARCH_EXTENDS
-	/*modified for sync the command*/
-	// Force each communication to be remapped
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		if (0 != tfa_cal->map_data.map_handle) {
-			result = afe_unmap_rtac_block(&tfa_cal->map_data.map_handle);
-		}
-	}
-	#endif /*OPLUS_ARCH_EXTENDS*/
+
 err:
 	return result;
 }
@@ -11442,18 +11250,6 @@ int send_tfa_cal_in_band(void *buf, int cmd_size)
 	union afe_spkr_prot_config afe_spk_config;
 	int32_t port_id = AFE_PORT_ID_TFADSP_RX;
 
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-/*Add for distinguish vi feedback port*/
-	if(tfa_use_i2s == 2) {
-		port_id = AFE_PORT_ID_TFADSP_RX_TERT;
-	}
-	/*Add for tdm mode iv feedback*/
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		port_id = afe_port_id_tfa_rx;
-	}
-#endif /* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
-
-
 	if (cmd_size > sizeof(afe_spk_config))
 		return -EINVAL;
 
@@ -11475,18 +11271,6 @@ int send_tfa_cal_set_bypass(void *buf, int cmd_size)
 	union afe_spkr_prot_config afe_spk_config;
 	int32_t port_id = AFE_PORT_ID_TFADSP_RX;
 
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-/*Add for distinguish vi feedback port*/
-	if(tfa_use_i2s == 2) {
-		port_id = AFE_PORT_ID_TFADSP_RX_TERT;
-	}
-	/*Add for tdm mode iv feedback*/
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		port_id = afe_port_id_tfa_rx;
-	}
-#endif /* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
-
-
 	if (cmd_size > sizeof(afe_spk_config))
 		return -EINVAL;
 
@@ -11507,17 +11291,6 @@ int send_tfa_cal_set_tx_enable(void *buf, int cmd_size)
 {
 	union afe_spkr_prot_config afe_spk_config;
 	int32_t port_id = AFE_PORT_ID_TFADSP_TX;
-
-#ifdef OPLUS_FEATURE_TFA98XX_VI_FEEDBACK
-/*Add for distinguish vi feedback port*/
-	if(tfa_use_i2s == 2) {
-		port_id = AFE_PORT_ID_TFADSP_TX_TERT;
-	}
-	/*Add for tdm mode iv feedback*/
-	if (TDM_FLAG == smartpa_tdm_port_id_flag) {
-		port_id = afe_port_id_tfa_tx;
-	}
-#endif /* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
 
 	if (cmd_size > sizeof(afe_spk_config))
 		return -EINVAL;
@@ -11551,19 +11324,6 @@ int get_smartpa_id(void)
 	return smartpa_id;
 }
 EXPORT_SYMBOL(get_smartpa_id);
-
-void set_smartpa_info(int port_id_flag, int mi2s_id)
-{
-	smartpa_tdm_port_id_flag = port_id_flag;
-
-	afe_port_id_tfa_rx = tfa_get_tdm_port_id(mi2s_id, AFE_PORT_RX);
-	afe_port_id_tfa_tx = tfa_get_tdm_port_id(mi2s_id, AFE_PORT_TX);
-
-	pr_err("%s:afe_port_id_tfa_rx = %d  afe_port_id_tfa_tx = %d smartpa_tdm_port_id_flag =%d\n", __func__, afe_port_id_tfa_rx,afe_port_id_tfa_tx,smartpa_tdm_port_id_flag);
-
-	return ;
-}
-EXPORT_SYMBOL(set_smartpa_info);
 #endif /* OPLUS_FEATURE_TFA98XX_VI_FEEDBACK */
 
 int __init afe_init(void)
