@@ -428,4 +428,25 @@ config ARCH_ZYNQMP
 	help
 	  This enables support for Xilinx ZynqMP Family
 
+menu "Realme Family"
+config BOARD_REALME
+        bool "Realme Family"
+        help
+          This enables support for Realme Family devices.
+
+if BOARD_REALME
+config BOARD_REALME_SM8250
+        bool "Realme SM8250 Board"
+        select ARCH_QCOM
+        select ARCH_KONA
+
+config BOARD_RE54E4L1
+        bool "RE54E4L1 platform"
+        select BOARD_REALME_SM8250
+        help
+          This enables support for Realme Neo 3T / Realme Q5 Pro.
+
+endif
+endmenu
+
 endmenu
