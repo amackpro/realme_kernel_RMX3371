@@ -15,25 +15,25 @@
 #include <../fs/proc/internal.h>
 #include <linux/thread_info.h>
 
-#include "sched_assist_common.h"
-#include "sched_assist_slide.h"
+#include <linux/sched_assist/sched_assist_common.h>
+#include <linux/sched_assist/sched_assist_slide.h>
 #ifdef CONFIG_MMAP_LOCK_OPT
 #include <linux/mm.h>
 #include <linux/rwsem.h>
 #endif
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
 #ifndef CONFIG_ARCH_HOLI
-#include <../kernel/sched/walt/walt.h>
+#include <../kernel/sched/walt/walth.h>
 #endif
 #else
 #include <../kernel/sched/walt.h>
 #endif
-#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST) && defined(CONFIG_OPLUS_FEATURE_IM)
+#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST_V4) && defined(CONFIG_OPLUS_FEATURE_IM)
 extern bool is_webview(struct task_struct *p);
 #endif
 
 #define CREATE_TRACE_POINTS
-#include <sched_assist_trace.h>
+//#include <linux/sched_assist/sched_assist_trace.h>
 
 int ux_min_sched_delay_granularity;
 int ux_max_inherit_exist = 1000;
@@ -773,7 +773,7 @@ inline int get_ux_state_type(struct task_struct *task)
 
 inline bool test_list_pick_ux(struct task_struct *task)
 {
-#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST) && defined(CONFIG_OPLUS_FEATURE_IM)
+#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST_V4) && defined(CONFIG_OPLUS_FEATURE_IM)
 	if (is_webview(task))
 		return true;
 #endif
@@ -1424,7 +1424,7 @@ bool should_ux_preempt_wakeup(struct task_struct *wake_task, struct task_struct 
 {
 	bool wake_ux = false;
 	bool curr_ux = false;
-#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST) && defined(CONFIG_OPLUS_FEATURE_IM)
+#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST_V4) && defined(CONFIG_OPLUS_FEATURE_IM)
 	bool wake_web = false;
 	bool curr_web = false;
 #endif
@@ -1432,7 +1432,7 @@ bool should_ux_preempt_wakeup(struct task_struct *wake_task, struct task_struct 
 	if (!sysctl_sched_assist_enabled)
 		return false;
 
-#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST) && defined(CONFIG_OPLUS_FEATURE_IM)
+#if defined(CONFIG_OPLUS_FEATURE_INPUT_BOOST_V4) && defined(CONFIG_OPLUS_FEATURE_IM)
 	wake_web = is_webview(wake_task);
 	curr_web = is_webview(curr_task);
 	if (wake_web && !curr_web)

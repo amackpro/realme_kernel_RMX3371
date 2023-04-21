@@ -8,7 +8,7 @@
 #include <linux/uaccess.h>
 #include <linux/pid.h>
 #include <linux/version.h>
-#include "sched_assist_common.h"
+#include <linux/sched_assist/sched_assist_common.h>
 
 struct task_struct* get_futex_owner_by_pid(u32 owner_tid)
 {

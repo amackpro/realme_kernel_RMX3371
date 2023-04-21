@@ -9,7 +9,7 @@
 #include <linux/seq_file.h>
 #include <../fs/proc/internal.h>
 #include <linux/sched/signal.h>
-#include "sched_assist_common.h"
+#include <linux/sched_assist/sched_assist_common.h>
 
 #include <linux/mm.h>
 #include <linux/rwsem.h>

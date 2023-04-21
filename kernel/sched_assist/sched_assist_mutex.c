@@ -8,7 +8,7 @@
 #include <linux/sched.h>
 #include <linux/list.h>
 #include <linux/mutex.h>
-#include "sched_assist_common.h"
+#include <linux/sched_assist/sched_assist_common.h>
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
 #define MUTEX_FLAGS		0x07

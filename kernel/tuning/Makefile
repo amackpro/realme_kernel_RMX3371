@@ -1,5 +1,1 @@
-obj-y += sched_assist_ofb.o
-obj-y += frame_boost_group.o
-obj-y += frame_info.o
-obj-y += webview_boost.o
-obj-y += rt_boost.o
+obj-$(CONFIG_OPLUS_FEATURE_INPUT_BOOST_V4) += sched_assist_ofb.o frame_boost_group.o frame_info.o webview_boost.o rt_boost.o

@@ -32,7 +32,7 @@
 #endif /* OPLUS_FEATURE_SCHED_ASSIST */
 
 #ifdef OPLUS_FEATURE_SCHED_ASSIST
-#include <linux/special_opt/special_opt.h>
+#include <linux/special_opt.h>
 #endif
 #ifdef OPLUS_FEATURE_SCHED_ASSIST
 extern unsigned int walt_scale_demand_divisor;
