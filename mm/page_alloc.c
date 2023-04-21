@@ -2346,7 +2346,7 @@ static void change_pageblock_range(struct page *pageblock_page,
 static bool can_steal_fallback(unsigned int order, int start_mt)
 {
 #if defined(OPLUS_FEATURE_MEMORY_ISOLATE) && defined(CONFIG_OPLUS_MEMORY_ISOLATE)
-	if(is_migrate_(start_mt))
+	if(is_migrate_oplus2(start_mt))
 		return false;
 #endif /*OPLUS_FEATURE_MEMORY_ISOLATE*/
 
