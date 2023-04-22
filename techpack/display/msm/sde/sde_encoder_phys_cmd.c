@@ -13,7 +13,7 @@
 #include "iris/dsi_iris5_api.h"
 #endif
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 #define SDE_DEBUG_CMDENC(e, fmt, ...) SDE_DEBUG("enc%d intf%d " fmt, \

@@ -21,7 +21,7 @@
 #include "dsi_parser.h"
 #include "msm_drv.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_dsi_support.h"
+#include "../oplus/oplus_dsi_support.h"
 struct oplus_brightness_alpha {
 	u32 brightness;
 	u32 alpha;

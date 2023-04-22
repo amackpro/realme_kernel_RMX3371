@@ -19,8 +19,8 @@
 #include "dsi_panel.h"
 #include "sde_hw_color_proc_common_v4.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_display_private_api.h"
-#include "oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
 #endif
 
 struct sde_cp_node {

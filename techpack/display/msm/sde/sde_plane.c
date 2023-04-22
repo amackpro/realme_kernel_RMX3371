@@ -37,7 +37,7 @@
 #include "sde_plane.h"
 #include "sde_color_processing.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_display_private_api.h"
+#include "../oplus/oplus_display_private_api.h"
 #endif
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 #include "iris/dsi_iris5_api.h"

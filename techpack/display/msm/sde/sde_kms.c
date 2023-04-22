@@ -60,12 +60,12 @@
 #define CREATE_TRACE_POINTS
 #include "sde_trace.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_display_private_api.h"
-#include "oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
 #endif
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 /* defines for secure channel call */

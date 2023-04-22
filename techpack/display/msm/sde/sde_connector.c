@@ -17,17 +17,17 @@
 #include "sde_crtc.h"
 #include "sde_rm.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_display_private_api.h"
-#include "oplus_dc_diming.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_dc_diming.h"
 #endif
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 #ifdef OPLUS_BUG_STABILITY
 #include "sde_trace.h"
 #include <linux/sched.h>
-#include "oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
 
 extern u32 g_new_bk_level;
 static DEFINE_SPINLOCK(g_bk_lock);

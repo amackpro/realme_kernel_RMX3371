@@ -19,13 +19,13 @@
 #endif
 #ifdef OPLUS_BUG_STABILITY
 #include <soc/oppo/boot_mode.h>
-#include "oplus_display_private_api.h"
-#include "oplus_dc_diming.h"
-#include "oplus_onscreenfingerprint.h"
-#include "oplus_aod.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_dc_diming.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_aod.h"
 #include "oplus_bl.h"
-#include "oplus_display_panel_common.h"
-#include "oplus_display_panel_cabc.h"
+#include "../oplus/oplus_display_panel_common.h"
+#include "../oplus/oplus_display_panel_cabc.h"
 #endif
 
 #ifdef CONFIG_OPLUS_FEATURE_MISC
@@ -33,7 +33,7 @@
 #endif
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #include "sde_trace.h"
 #endif /* OPLUS_FEATURE_ADFR */
 #include "sde_dbg.h"

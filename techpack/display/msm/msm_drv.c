@@ -52,7 +52,7 @@
 #endif
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "oplus/oplus_adfr.h"
 #endif
 
 /*

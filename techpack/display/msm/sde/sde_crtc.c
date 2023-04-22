@@ -44,9 +44,9 @@
 #ifdef OPLUS_BUG_STABILITY
 #include <linux/msm_drm_notify.h>
 #include <linux/notifier.h>
-#include "oplus_display_private_api.h"
-#include "oplus_onscreenfingerprint.h"
-#include "oplus_aod.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_aod.h"
 
 extern int oplus_dimlayer_fingerprint_failcount;
 extern int oplus_underbrightness_alpha;
@@ -55,7 +55,7 @@ extern int oplus_request_power_status;
 #endif
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)

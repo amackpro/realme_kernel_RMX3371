@@ -40,9 +40,9 @@
 #include "sde_hw_top.h"
 #include "sde_hw_qdss.h"
 #ifdef OPLUS_BUG_STABILITY
-#include "oplus_display_private_api.h"
-#include "oplus_onscreenfingerprint.h"
-#include "oplus_dc_diming.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_onscreenfingerprint.h"
+#include "../oplus/oplus_dc_diming.h"
 #endif
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 #include "iris/dsi_iris5_api.h"
@@ -52,7 +52,7 @@
 #endif
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 #ifdef OPLUS_BUG_STABILITY

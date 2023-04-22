@@ -22,7 +22,7 @@
 #include "dsi_parser.h"
 
 #ifdef OPLUS_FEATURE_ADFR
-#include "oplus_adfr.h"
+#include "../oplus/oplus_adfr.h"
 #endif
 
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
@@ -37,8 +37,8 @@
 #include <soc/oplus/system/oplus_mm_kevent_fb.h>
 #include <linux/msm_drm_notify.h>
 #include <linux/notifier.h>
-#include "oplus_display_private_api.h"
-#include "oplus_ffl.h"
+#include "../oplus/oplus_display_private_api.h"
+#include "../oplus/oplus_ffl.h"
 extern int msm_drm_notifier_call_chain(unsigned long val, void *v);
 /* Don't panic if smmu fault*/
 extern int sde_kms_set_smmu_no_fatal_faults(struct drm_device *drm);
